@@ -1,0 +1,45 @@
+tasks:
+  # 读取 docs/task.yml 文件，取第一条status为none的task，执行content中的内容后将status标记为done
+  # 执行下一条任务
+  - name: 创建项目
+    status: done
+    content: |
+      这是一个浏览器插件同步的项目，server 文件夹存放服务端代码，plugin 文件夹存放插件
+      server 端使用 nodejs 编写
+      plugin 目录创建 safari、chrome 插件
+      插件功能如下：
+      1. 点击浏览器上的插件，打开插件页面
+      2. 插件页面可以配置服务端地址，点击配置按钮，在弹窗中可以配置服务端地址
+      3. 插件页面展示收藏的网址，点击网址可以打开，多个网址可以拖动排序
+      4. 可以创建收藏分组，分组可以展开/折叠，未创建分组时显示 `默认分组`
+      5. 在浏览器标签页面右键，点击收藏网址，可以将当前页面收藏到默认分组
+      6. 在网页右键，点击收藏网址，可以将当前页面收藏默认分组
+      7. 点击同步按钮，可以将收藏的网址同步到服务端
+  - name: 更新图标
+    status: done
+    content: 将 docs/icon-192.png 转成插件icon
+  - name: 修改展示方式
+    status: done
+    content: 点击浏览器上的插件，在浏览器的新标签页中打开插件页面
+  - name: 网页收藏为离线模式
+    status: done
+    content: 插件中创建的分组，添加的收藏默认为离线模式，数据在未同步的情况下，刷新插件页面也需要显示数据
+  - name: 修改同步模式
+    status: done
+    content: |
+      修改同步的模式
+      1. 默认为离线模式，不自动同步，仅在点击同步按钮时才触发同步
+      2. 默认同步模式为合并同步，即将服务端和本地的数据进行合并
+      3. 同步按钮为dropdown按钮，点击后可以切换同步模式，可以选择同步模式：合并同步，本地覆盖，服务端覆盖
+  - name: 修复chrome插件报错
+    status: done
+    content: |
+      background.js:11:23 Error at property 'contexts': Error at index 0: Value must be one of action, all, audio, browser_action, editable, frame, image, launcher, link, page, page_action, selection, video. 
+  - name: 修改插件页的展示模式
+    status: done
+    content: |
+      1. 在其它页面收藏数据之后，切换到插件页面，数据应该显示最新的数据。目前还是显示的旧数据
+      2. 拖动A分组的数据到B分组之后，B分组还显示为数据为空，同时A分组没有时数时没有显示数据为空
+  - name: 在收藏网址前显示站点的icon
+    status: done
+    content: 在收藏网址前显示站点的icon

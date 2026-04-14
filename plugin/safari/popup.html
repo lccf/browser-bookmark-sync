@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>书签同步</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>书签同步</h1>
+      <button id="configBtn" class="btn-icon" title="配置">⚙️</button>
+    </header>
+
+    <!-- 配置弹窗 -->
+    <div id="configModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>配置服务端地址</h3>
+        <input type="text" id="serverUrl" placeholder="http://localhost:3000">
+        <div class="modal-actions">
+          <button id="saveConfig" class="btn-primary">保存</button>
+          <button id="cancelConfig" class="btn-secondary">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 同步按钮 -->
+    <div class="sync-section">
+      <div class="sync-dropdown">
+        <button id="syncBtn" class="btn-primary">🔄 同步到服务端</button>
+        <button id="syncModeBtn" class="btn-primary dropdown-toggle">▼</button>
+        <div id="syncModeMenu" class="dropdown-menu hidden">
+          <div class="dropdown-item active" data-mode="merge">
+            <span class="check">✓</span> 合并同步
+          </div>
+          <div class="dropdown-item" data-mode="local">
+            <span class="check">✓</span> 本地覆盖
+          </div>
+          <div class="dropdown-item" data-mode="server">
+            <span class="check">✓</span> 服务端覆盖
+          </div>
+        </div>
+      </div>
+      <span id="syncStatus"></span>
+    </div>
+
+    <!-- 添加分组 -->
+    <div class="add-group-section">
+      <input type="text" id="newGroupName" placeholder="新分组名称">
+      <button id="addGroupBtn" class="btn-secondary">+ 添加分组</button>
+    </div>
+
+    <!-- 书签列表 -->
+    <div id="bookmarksList" class="bookmarks-list">
+      <!-- 动态生成 -->
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
