@@ -25,10 +25,10 @@
       </div>
     </div>
 
-    <!-- 同步按钮 -->
-    <div class="sync-section">
+    <!-- 操作按钮行：同步 + 导入导出 -->
+    <div class="action-section">
       <div class="sync-dropdown">
-        <button id="syncBtn" class="btn-primary">🔄 同步到服务端</button>
+        <button id="syncBtn" class="btn-primary">🔄 同步</button>
         <button id="syncModeBtn" class="btn-primary dropdown-toggle">▼</button>
         <div id="syncModeMenu" class="dropdown-menu hidden">
           <div class="dropdown-item active" data-mode="merge">
@@ -43,6 +43,38 @@
         </div>
       </div>
       <span id="syncStatus"></span>
+      <button id="exportBtn" class="btn-secondary">📥 导出</button>
+      <button id="importBtn" class="btn-secondary">📤 导入</button>
+    </div>
+
+    <!-- 导入弹窗 -->
+    <div id="importModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>导入书签</h3>
+        
+        <!-- 文件选择 -->
+        <div class="file-select-section">
+          <input type="file" id="importFile" accept=".json" class="hidden">
+          <button id="selectFileBtn" class="btn-secondary">选择文件</button>
+          <span id="selectedFileName" class="file-name">未选择文件</span>
+        </div>
+        
+        <p class="modal-desc">选择导入方式：</p>
+        <div class="import-options">
+          <label class="radio-label">
+            <input type="radio" name="importMode" value="merge" checked>
+            <span>增量导入（合并到现有数据）</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="importMode" value="overwrite">
+            <span>全量覆盖（替换现有数据）</span>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button id="confirmImport" class="btn-primary" disabled>确认导入</button>
+          <button id="cancelImport" class="btn-secondary">取消</button>
+        </div>
+      </div>
     </div>
 
     <!-- 添加分组 -->

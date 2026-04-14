@@ -43,3 +43,19 @@ tasks:
   - name: 在收藏网址前显示站点的icon
     status: done
     content: 在收藏网址前显示站点的icon
+  - name: 添加导入/导出功能
+    status: done
+    content: 添加导入/导出功能，导入默认为增量导入，可选择全量覆盖
+  - name: 修改导入功能
+    status: done
+    content: 导入按钮点击后，打开弹窗，选择导入的文件和导入模式，点击确定导入
+  - name: 调整样式
+    status: done
+    content: |
+      调整样式
+      1. 插件页，导入/导出和同步按钮放在一行
+      2. 导入弹窗 选择文件按钮和文件控件高度保持一致，导入模式单选框占的空间太大了，调小一些
+  - name: 修改插件页默认宽度
+    status: done
+    content: 修改插件页默认宽度为600px
+  

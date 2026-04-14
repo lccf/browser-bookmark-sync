@@ -429,4 +429,110 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('newGroupName').value = '';
     renderBookmarks();
   });
+  
+  // 导出功能
+  document.getElementById('exportBtn').addEventListener('click', async () => {
+    const data = await getLocalData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookmarks-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showSyncStatus('导出成功!', 'success');
+  });
+  
+  // 导入功能
+  let importFileContent = null;
+  let selectedFileName = '';
+  const importFileInput = document.getElementById('importFile');
+  const importModal = document.getElementById('importModal');
+  const selectFileBtn = document.getElementById('selectFileBtn');
+  const selectedFileNameEl = document.getElementById('selectedFileName');
+  const confirmImportBtn = document.getElementById('confirmImport');
+  
+  // 打开导入弹窗
+  document.getElementById('importBtn').addEventListener('click', () => {
+    // 重置状态
+    importFileContent = null;
+    selectedFileName = '';
+    selectedFileNameEl.textContent = '未选择文件';
+    selectedFileNameEl.classList.remove('has-file');
+    confirmImportBtn.disabled = true;
+    importFileInput.value = '';
+    // 默认选中增量导入
+    document.querySelector('input[name="importMode"][value="merge"]').checked = true;
+    importModal.classList.remove('hidden');
+  });
+  
+  // 选择文件按钮
+  selectFileBtn.addEventListener('click', () => {
+    importFileInput.click();
+  });
+  
+  // 文件选择变化
+  importFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    selectedFileName = file.name;
+    selectedFileNameEl.textContent = file.name;
+    selectedFileNameEl.classList.add('has-file');
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        importFileContent = JSON.parse(event.target.result);
+        confirmImportBtn.disabled = false;
+      } catch (error) {
+        alert('文件格式错误，请上传有效的 JSON 文件');
+        importFileContent = null;
+        confirmImportBtn.disabled = true;
+      }
+    };
+    reader.onerror = () => {
+      alert('文件读取失败');
+      importFileContent = null;
+      confirmImportBtn.disabled = true;
+    };
+    reader.readAsText(file);
+  });
+  
+  document.getElementById('cancelImport').addEventListener('click', () => {
+    importModal.classList.add('hidden');
+    importFileContent = null;
+    selectedFileName = '';
+  });
+  
+  document.getElementById('confirmImport').addEventListener('click', async () => {
+    if (!importFileContent) {
+      alert('请先选择文件');
+      return;
+    }
+    
+    const importMode = document.querySelector('input[name="importMode"]:checked').value;
+    
+    try {
+      if (importMode === 'overwrite') {
+        // 全量覆盖
+        await setLocalData(importFileContent);
+      } else {
+        // 增量导入（合并）
+        const currentData = await getLocalData();
+        const mergedData = {
+          groups: mergeGroups(currentData.groups, importFileContent.groups)
+        };
+        await setLocalData(mergedData);
+      }
+      
+      importModal.classList.add('hidden');
+      importFileContent = null;
+      selectedFileName = '';
+      await renderBookmarks();
+      showSyncStatus('导入成功!', 'success');
+    } catch (error) {
+      alert('导入失败: ' + error.message);
+    }
+  });
 });
