@@ -155,8 +155,9 @@ async function renderBookmarks() {
   }
   
   container.innerHTML = data.groups.map(group => `
-    <div class="group" data-group-id="${group.id}">
+    <div class="group" draggable="true" data-group-id="${group.id}">
       <div class="group-header">
+        <span class="group-drag-handle">⋮⋮</span>
         <span class="group-toggle">▼</span>
         <span class="group-name">${escapeHtml(group.name)}</span>
         <span class="group-count">${group.bookmarks.length}</span>
@@ -166,7 +167,7 @@ async function renderBookmarks() {
         ${group.bookmarks.map((bookmark, index) => `
           <div class="bookmark-item" draggable="true" data-bookmark-id="${bookmark.id}" data-index="${index}">
             <span class="bookmark-drag-handle">⋮⋮</span>
-            <img class="bookmark-favicon" src="${getFaviconUrl(bookmark.url)}" alt="" onerror="this.style.display='none'">
+            <img class="bookmark-favicon" src="${getFaviconUrl(bookmark.url)}" alt="">
             <a href="${escapeHtml(bookmark.url)}" class="bookmark-link" target="_blank" title="${escapeHtml(bookmark.title)}">
               ${escapeHtml(bookmark.title)}
             </a>
@@ -229,6 +230,13 @@ function bindGroupEvents() {
 
 // 绑定书签事件
 function bindBookmarkEvents() {
+  // favicon 加载失败时隐藏
+  document.querySelectorAll('.bookmark-favicon').forEach(img => {
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+    });
+  });
+  
   // 删除书签
   document.querySelectorAll('.bookmark-delete').forEach(btn => {
     btn.addEventListener('click', async (e) => {
@@ -250,18 +258,22 @@ function bindBookmarkEvents() {
 
 // 绑定拖拽事件
 function bindDragEvents() {
+  // 书签拖拽
   const draggables = document.querySelectorAll('.bookmark-item');
   const containers = document.querySelectorAll('.bookmarks-container');
   
   draggables.forEach(draggable => {
-    draggable.addEventListener('dragstart', () => {
+    draggable.addEventListener('dragstart', (e) => {
       draggable.classList.add('dragging');
+      e.stopPropagation();
     });
     
     draggable.addEventListener('dragend', async () => {
       draggable.classList.remove('dragging');
-      // 保存新的顺序
-      await saveBookmarkOrder();
+      // 延迟保存，确保 DOM 已更新
+      setTimeout(async () => {
+        await saveBookmarkOrder();
+      }, 0);
     });
   });
   
@@ -269,7 +281,8 @@ function bindDragEvents() {
     container.addEventListener('dragover', e => {
       e.preventDefault();
       const afterElement = getDragAfterElement(container, e.clientY);
-      const draggable = document.querySelector('.dragging');
+      const draggable = document.querySelector('.bookmark-item.dragging');
+      if (!draggable) return;
       if (afterElement == null) {
         container.appendChild(draggable);
       } else {
@@ -277,6 +290,38 @@ function bindDragEvents() {
       }
     });
   });
+  
+  // 分组拖拽
+  const groupElements = document.querySelectorAll('.group');
+  const bookmarksList = document.getElementById('bookmarksList');
+  
+  groupElements.forEach(group => {
+    group.addEventListener('dragstart', (e) => {
+      group.classList.add('group-dragging');
+      e.stopPropagation();
+    });
+    
+    group.addEventListener('dragend', async () => {
+      group.classList.remove('group-dragging');
+      // 保存分组顺序
+      await saveGroupOrder();
+    });
+  });
+  
+  if (bookmarksList) {
+    bookmarksList.addEventListener('dragover', e => {
+      const draggingGroup = document.querySelector('.group-dragging');
+      if (!draggingGroup) return;
+      
+      e.preventDefault();
+      const afterGroup = getDragAfterGroup(bookmarksList, e.clientY);
+      if (afterGroup == null) {
+        bookmarksList.appendChild(draggingGroup);
+      } else {
+        bookmarksList.insertBefore(draggingGroup, afterGroup);
+      }
+    });
+  }
 }
 
 // 获取拖拽后的位置
@@ -294,6 +339,36 @@ function getDragAfterElement(container, y) {
   }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
+// 获取分组拖拽后的位置
+function getDragAfterGroup(container, y) {
+  const draggableElements = [...container.querySelectorAll('.group:not(.group-dragging)')];
+  
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// 保存分组顺序
+async function saveGroupOrder() {
+  const data = await getLocalData();
+  const bookmarksList = document.getElementById('bookmarksList');
+  if (!bookmarksList) return;
+  
+  const groupIds = [...bookmarksList.querySelectorAll('.group')].map(el => el.dataset.groupId);
+  const groupMap = new Map(data.groups.map(g => [g.id, g]));
+  
+  // 按 DOM 顺序重新排列分组
+  data.groups = groupIds.map(id => groupMap.get(id)).filter(Boolean);
+  
+  await setLocalData(data);
+}
+
 // 保存书签顺序（支持跨分组拖拽）
 async function saveBookmarkOrder() {
   const data = await getLocalData();
@@ -304,18 +379,24 @@ async function saveBookmarkOrder() {
     g.bookmarks.forEach(b => allBookmarksMap.set(b.id, b));
   });
   
+  // 创建新的分组数据数组
+  const newGroups = data.groups.map(g => ({ ...g, bookmarks: [] }));
+  
   // 根据当前 DOM 状态更新各分组的书签
   document.querySelectorAll('.group').forEach(groupEl => {
     const groupId = groupEl.dataset.groupId;
-    const group = data.groups.find(g => g.id === groupId);
+    const group = newGroups.find(g => g.id === groupId);
     if (group) {
       const bookmarkIds = [...groupEl.querySelectorAll('.bookmark-item')].map(el => el.dataset.bookmarkId);
       group.bookmarks = bookmarkIds.map(id => allBookmarksMap.get(id)).filter(Boolean);
     }
   });
   
+  // 更新数据
+  data.groups = newGroups;
   await setLocalData(data);
-  // 重新渲染以更新空分组提示
+  
+  // 重新渲染以更新空分组提示和计数
   await renderBookmarks();
 }
 

@@ -301,7 +301,6 @@ header h1 {
 
 /* 书签列表 */
 .bookmarks-list {
-  max-height: 350px;
   overflow-y: auto;
 }
 
@@ -324,6 +323,14 @@ header h1 {
 
 .group-header:hover {
   background: #f0f0f0;
+}
+
+.group-drag-handle {
+  color: #ccc;
+  margin-right: 8px;
+  cursor: move;
+  font-size: 12px;
+  user-select: none;
 }
 
 .group-toggle {

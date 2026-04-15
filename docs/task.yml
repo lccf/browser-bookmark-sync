@@ -61,3 +61,19 @@ tasks:
   - name: 生成readme
     status: done
     content: 生成readme.md文件，包含项目介绍、安装、使用等信息
+  - name: 去除bookmarksList高度限制
+    status: done
+    content: 去除bookmarksList高度限制
+  - name: 分组支持拖动排序
+    status: done
+    content: 分组支持拖动排序
+  - name: fix chrome Error
+    status: done
+    content: |
+      fix chrome Error 
+      - Refused to execute inline event handler because it violates the following Content Security Policy directive: "script-src 'self'". Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present.
+      - Refused to execute inline event handler because it violates the following Content Security Policy directive: "script-src 'self' 'wasm-unsafe-eval' 'inline-speculation-rules' http://localhost:* http://127.0.0.1:*". Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present.
+  - name: 修复收藏网址跨组
+    status: done
+    content: 修复收藏网址跨组拖动排序时，目标组数据不更新的问题
+  
