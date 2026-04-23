@@ -1,5 +1,5 @@
 tasks:
-  # 读取 docs/task.yml 文件，取第一条status为none的task，执行content中的内容后将status标记为done
+  # 取 docs/task.yml 文件第一条status不为none的task，执行content中的内容后将status标记为done
   # 执行下一条任务
   - name: 创建项目
     status: done
@@ -76,4 +76,6 @@ tasks:
   - name: 修复收藏网址跨组
     status: done
     content: 修复收藏网址跨组拖动排序时，目标组数据不更新的问题
-  
+  - name: 插件图标添加收藏交互
+    status: done
+    content: 在浏览器插件图标右键菜单上增加 收藏当前页面 交互，功能同网页右键收藏交互相同

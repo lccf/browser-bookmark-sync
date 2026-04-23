@@ -13,18 +13,32 @@ chrome.runtime.onInstalled.addListener(() => {
     title: '收藏链接',
     contexts: ['link']
   });
+
+  // 在插件图标右键菜单中添加"收藏当前页面"
+  chrome.contextMenus.create({
+    id: 'bookmarkFromIcon',
+    title: '收藏当前页面',
+    contexts: ['action']
+  });
 });
 
 // 处理右键菜单点击
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   let title, url;
-  
+
   if (info.menuItemId === 'bookmarkPage') {
     title = tab.title;
     url = tab.url;
   } else if (info.menuItemId === 'bookmarkLink') {
     title = info.linkText || info.linkUrl;
     url = info.linkUrl;
+  } else if (info.menuItemId === 'bookmarkFromIcon') {
+    // 从插件图标右键菜单触发，需要获取当前活动标签页
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (activeTab) {
+      title = activeTab.title;
+      url = activeTab.url;
+    }
   }
   
   if (title && url) {
